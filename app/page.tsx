@@ -28,7 +28,7 @@ export default function Home() {
 
       <main className="flex-1">
         {/* HERO */}
-        <section className="container max-w-screen-xl mx-auto px-6 md:px-10 py-12 md:py-16">
+        <section className="container max-w-screen-xl mx-auto px-6 md:px-10 py-6 md:py-8">
           <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
             <div className="flex flex-col gap-6">
               <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-5xl leading-tight">
@@ -87,7 +87,7 @@ export default function Home() {
             ].map((item, i) => (
               <div
                 key={i}
-                className="flex h-60 flex-col justify-between rounded-lg bg-primary/90 p-6 text-primary-foreground transition-all hover:shadow-lg hover:scale-[1.02]"
+                className="flex h-60 flex-col justify-between rounded-lg bg-[#8CB459] p-6 text-primary-foreground transition-all hover:bg-[#7a9d4d] hover:shadow-lg hover:scale-[1.02]"
               >
                 <div className="h-10 w-10 text-primary-foreground">
                   {item.icon}

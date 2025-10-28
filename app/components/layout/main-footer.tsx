@@ -1,6 +1,6 @@
 // components/layout/main-footer.tsx
-import React from 'react';
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
 
 export function MainFooter() {
   return (
@@ -14,7 +14,7 @@ export function MainFooter() {
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           {/* Bagian Kiri (Copyright) */}
           <div className="text-center md:text-left">
-            <h3 className="text-lg font-bold text-primary">EmergencyyCall</h3>
+            <h3 className="text-lg font-bold text-[#8CB459]">EmergencyyCall</h3>
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} EmergencyyCall. All rights reserved.
             </p>
@@ -22,13 +22,22 @@ export function MainFooter() {
           {/* Bagian Kanan (Links) */}
           {/* Jarak 'gap-4' bisa disesuaikan jika perlu */}
           <div className="flex flex-wrap justify-center gap-4 md:justify-end">
-            <Link href="#" className="text-sm text-muted-foreground hover:text-primary">
+            <Link
+              href="#"
+              className="text-sm text-muted-foreground hover:text-primary"
+            >
               Privacy
             </Link>
-            <Link href="#" className="text-sm text-muted-foreground hover:text-primary">
+            <Link
+              href="#"
+              className="text-sm text-muted-foreground hover:text-primary"
+            >
               Terms
             </Link>
-            <Link href="#" className="text-sm text-muted-foreground hover:text-primary">
+            <Link
+              href="#"
+              className="text-sm text-muted-foreground hover:text-primary"
+            >
               Customer Service
             </Link>
           </div>
