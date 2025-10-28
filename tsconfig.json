@@ -30,11 +30,10 @@
   },
   "include": [
     "next-env.d.ts",
+    "global.d.ts", // ✅ penting agar deklarasi CSS dikenali
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts",
     ".next\\dev/types/**/*.ts",
     ".next\\dev/types/**/*.ts"
   ],

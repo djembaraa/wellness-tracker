@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 
 // Kita akan re-use Sidebar
-import { Sidebar } from './sidebar';
+import  { DashboardSidebar }  from './dashboard-sidebar';
 
 export function MobileNav() {
   return (
@@ -19,7 +19,7 @@ export function MobileNav() {
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-64">
           {/* Render Sidebar di dalam Sheet */}
-          <Sidebar />
+          <DashboardSidebar />
         </SheetContent>
       </Sheet>
     </header>
