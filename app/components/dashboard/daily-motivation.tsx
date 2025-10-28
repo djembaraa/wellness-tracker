@@ -31,7 +31,7 @@ export function DailyMotivation() {
         <Sparkles className="h-4 w-4 text-primary" />
       </CardHeader>
       <CardContent>
-        <p className="text-lg italic text-gray-700 pt-2">{`"{message}"`}</p>
+        <p className="text-lg italic text-gray-700 pt-2">{`"Berjuanglah meskipun itu sulit"`}</p>
       </CardContent>
     </Card>
   );

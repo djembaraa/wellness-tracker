@@ -1,5 +1,9 @@
 // app/dashboard/statistik/page.tsx
-'use client'; // Diperlukan untuk Tabs dan Grafik
+'use client'; // Diperlukan untuk Tabs, Grafik, dan Effect
+
+// 1. Impor hook dan supabase
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -24,21 +28,17 @@ import {
   Droplet,
   Footprints,
   TrendingUp,
+  Ruler, // Tambahkan ikon Tinggi Badan
 } from 'lucide-react';
 
-// --- Data Dummy (tetap sama) ---
+// --- Data Dummy (hanya untuk grafik) ---
 const weightTrendData = Array.from({ length: 30 }, (_, i) => ({
   hari: i + 1,
   berat: 78 + Math.sin(i / 3) * 1.5 + Math.random() * 0.5,
 }));
 const sleepDetailData = [
   { day: 'Sen', Deep: 4, Light: 2.5, REM: 1.5 },
-  { day: 'Sel', Deep: 3.5, Light: 3, REM: 1 },
-  { day: 'Rab', Deep: 5, Light: 2, REM: 1.2 },
-  { day: 'Kam', Deep: 4.2, Light: 2.8, REM: 1.3 },
-  { day: 'Jum', Deep: 3.8, Light: 2.5, REM: 1.7 },
-  { day: 'Sab', Deep: 6, Light: 2, REM: 1.5 },
-  { day: 'Min', Deep: 4.5, Light: 2.5, REM: 1.1 },
+  // ... (data lain)
 ];
 const bloodCheckData = {
   cholesterol: 195,
@@ -47,21 +47,44 @@ const bloodCheckData = {
 };
 const activityData = [
   { day: 'Sen', steps: 8500 },
-  { day: 'Sel', steps: 9200 },
-  { day: 'Rab', steps: 7800 },
-  { day: 'Kam', steps: 10500 },
-  { day: 'Jum', steps: 8800 },
-  { day: 'Sab', steps: 12400 },
-  { day: 'Min', steps: 9500 },
+  // ... (data lain)
 ];
 // --- Akhir Data Dummy ---
 
 // --- Komponen Halaman Statistik ---
 export default function StatistikPage() {
+  
+  // 2. Buat state untuk data non-dummy
+  const [loading, setLoading] = useState(true);
+  const [weight, setWeight] = useState<number | null>(null);
+  const [height, setHeight] = useState<number | null>(null);
+
+  // 3. Ambil data dari tabel 'profiles'
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select('height_cm, weight_kg')
+          .eq('id', user.id)
+          .single();
+
+        if (profileData) {
+          setHeight(profileData.height_cm);
+          setWeight(profileData.weight_kg);
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchProfileData();
+  }, []);
+
+
   return (
-    // ======================================================
-    // PERBAIKAN STRUKTUR DIMULAI DI SINI
-    // ======================================================
     <Tabs defaultValue="bulanan" className="w-full">
       <div className="flex flex-col gap-6">
         {/* 1. Header Halaman dan Filter Tab */}
@@ -69,7 +92,6 @@ export default function StatistikPage() {
           <h1 className="text-3xl font-bold text-gray-900">
             Laporan Statistik
           </h1>
-          {/* TabsList sekarang ada di dalam Tabs utama */}
           <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="mingguan">Mingguan</TabsTrigger>
             <TabsTrigger value="bulanan">Bulanan</TabsTrigger>
@@ -80,34 +102,35 @@ export default function StatistikPage() {
         {/* --- KONTEN TAB BULANAN --- */}
         <TabsContent value="bulanan" className="mt-0">
           <div className="flex flex-col gap-6">
-            {/* 2. Kartu Ringkasan Statistik */}
+            
+            {/* 4. Kartu Ringkasan Statistik (SEKARANG NON-DUMMY) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <StatCard
-                title="Rata-rata Detak Jantung"
-                value="74 BPM"
-                icon={HeartPulse}
-                trend="2%"
-              />
-              <StatCard
-                title="Perubahan Berat Badan (30 Hari)"
-                value="-1.2 kg"
+                title="Berat Badan Saat Ini"
+                value={loading ? '...' : (weight ? `${weight} kg` : 'N/A')}
                 icon={Scale}
-                trend="-1.5%"
+                isNonDummy={true} // Tandai sebagai non-dummy
               />
               <StatCard
-                title="Rata-rata Tidur"
+                title="Tinggi Badan"
+                value={loading ? '...' : (height ? `${height} cm` : 'N/A')}
+                icon={Ruler} // Ganti ikon
+                isNonDummy={true}
+              />
+              <StatCard
+                title="Rata-rata Tidur (Dummy)"
                 value="7j 15m"
                 icon={BedDouble}
-                trend="5%"
+                trend="5%" // Masih dummy
               />
             </div>
 
-            {/* 3. Grafik Besar - Tren Berat Badan */}
+            {/* 3. Grafik Besar - Tren Berat Badan (Masih Dummy) */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Scale className="h-5 w-5" />
-                  Tren Berat Badan (30 Hari Terakhir)
+                  Tren Berat Badan (Data Dummy 30 Hari)
                 </CardTitle>
               </CardHeader>
               <CardContent className="h-72">
@@ -129,14 +152,14 @@ export default function StatistikPage() {
               </CardContent>
             </Card>
 
-            {/* 4. Grid Detail 2x2 */}
+            {/* 4. Grid Detail 2x2 (Masih Dummy) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Kartu Detail Tidur */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BedDouble className="h-5 w-5" />
-                    Detail Aktivitas Tidur (Mingguan)
+                    Detail Aktivitas Tidur (Data Dummy)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-64">
@@ -160,7 +183,7 @@ export default function StatistikPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Footprints className="h-5 w-5" />
-                    Aktivitas Langkah (Mingguan)
+                    Aktivitas Langkah (Data Dummy)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-64">
@@ -181,7 +204,7 @@ export default function StatistikPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Droplet className="h-5 w-5" />
-                    Hasil Cek Darah (Statis)
+                    Hasil Cek Darah (Data Dummy)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -199,47 +222,30 @@ export default function StatistikPage() {
           </div>
         </TabsContent>
 
-        {/* --- KONTEN TAB MINGGUAN (TAMBAHAN) --- */}
+        {/* --- KONTEN TAB MINGGUAN (Placeholder) --- */}
         <TabsContent value="mingguan" className="mt-0">
-          <div className="flex flex-col gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Konten Mingguan</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Ini adalah konten untuk tab mingguan.</p>
-              </CardContent>
-            </Card>
-          </div>
+          <Card><CardHeader><CardTitle>Konten Mingguan</CardTitle></CardHeader></Card>
         </TabsContent>
 
-        {/* --- KONTEN TAB TAHUNAN (TAMBAHAN) --- */}
+        {/* --- KONTEN TAB TAHUNAN (Placeholder) --- */}
         <TabsContent value="tahunan" className="mt-0">
-          <div className="flex flex-col gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Konten Tahunan</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Ini adalah konten untuk tab tahunan.</p>
-              </CardContent>
-            </Card>
-          </div>
+           <Card><CardHeader><CardTitle>Konten Tahunan</CardTitle></CardHeader></Card>
         </TabsContent>
       </div>
-    </Tabs> // <-- <Tabs> DITUTUP DI SINI, MEMBUNGKUS SEMUA <TabsContent>
+    </Tabs>
   );
 }
 
-// --- Komponen Helper (tetap sama) ---
+// --- Komponen Helper (Diperbarui) ---
 
-function StatCard({ title, value, icon: Icon, trend }: {
+function StatCard({ title, value, icon: Icon, trend, isNonDummy = false }: {
   title: string;
   value: string;
   icon: React.ElementType;
-  trend: string;
+  trend?: string;
+  isNonDummy?: boolean;
 }) {
-  const isPositive = trend.startsWith('+') || !trend.startsWith('-');
+  const isPositive = trend && (trend.startsWith('+') || !trend.startsWith('-'));
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -248,15 +254,23 @@ function StatCard({ title, value, icon: Icon, trend }: {
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        <p className={`text-xs ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-          <TrendingUp className="inline h-3 w-3 mr-1" />
-          {trend} vs bulan lalu
-        </p>
+        {/* Hanya tampilkan 'trend' jika datanya BUKAN non-dummy */}
+        {!isNonDummy && trend && (
+          <p className={`text-xs ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+            <TrendingUp className="inline h-3 w-3 mr-1" />
+            {trend} vs bulan lalu
+          </p>
+        )}
+        {/* Tampilkan info bahwa ini data asli */}
+        {isNonDummy && (
+          <p className="text-xs text-muted-foreground">Data dari profil Anda</p>
+        )}
       </CardContent>
     </Card>
   );
 }
 
+// Item List untuk Cek Darah
 function BloodStatItem({ title, value, status }: {
   title: string;
   value: string;

@@ -1,40 +1,63 @@
-// app/(auth)/signin/page.tsx
-
+// app/(auth)/login/page.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { useState } from "react"; // 1. Impor useState
-import { useRouter } from "next/navigation"; // 2. Impor useRouter untuk redirect
-import { supabase } from "@/lib/supabaseClient"; // 3. Impor Supabase client-mu
+import { useState } from "react";
+import { useRouter } from "next/navigation"; // Pastikan ini diimpor
+import { supabase } from "@/lib/supabaseClient";
 
 export default function SignInPage() {
-  // 4. Buat state
+  // State untuk form
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const router = useRouter(); // 5. Inisialisasi router
+  
+  // Inisialisasi router
+  const router = useRouter();
 
-  // 6. Buat fungsi handleSignIn
+  // Fungsi handleSignIn
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Mencegah refresh halaman
     setLoading(true);
     setMessage("");
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // 1. Coba Sign In
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
 
-      if (error) throw error;
+      if (authError) throw authError; // Jika login gagal, lempar error
 
-      router.push("/dashboard");
-    
-    } catch (error) { // <-- Hapus ': any'
-      // Tambahkan pengecekan ini
+      // 2. Jika Login Berhasil, cek tabel 'profiles'
+      if (authData.user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('id, full_name') // Cukup cek apakah ada datanya
+          .eq('id', authData.user.id)
+          .single(); // Ambil satu baris
+
+        // Cek jika ada error, TAPI abaikan error 'PGRST116' (Row not found)
+        // Karena 'Row not found' BUKAN error, tapi memang datanya kosong.
+        if (profileError && profileError.code !== 'PGRST116') {
+          throw profileError;
+        }
+
+        // 3. Logika Redirect
+        if (!profileData) {
+          // JIKA TIDAK ADA PROFIL, arahkan ke setup-profile
+          router.push('/setup-profile');
+        } else {
+          // JIKA ADA PROFIL, arahkan ke dashboard
+          router.push('/dashboard');
+        }
+      }
+      
+    } catch (error) { // Menangani error login atau error database
       if (error instanceof Error) {
         setMessage(`Error: ${error.message}`);
       } else {
@@ -52,7 +75,7 @@ export default function SignInPage() {
           Sign In
         </h1>
 
-        {/* 9. Hubungkan form ke fungsi handleSignIn */}
+        {/* Hubungkan form ke fungsi handleSignIn */}
         <form className="space-y-4" onSubmit={handleSignIn}>
           <div>
             <label className="text-sm font-medium text-gray-700">Email</label>
@@ -60,8 +83,8 @@ export default function SignInPage() {
               type="email"
               placeholder="you@example.com"
               required
-              value={email} // 9. Hubungkan state
-              onChange={(e) => setEmail(e.target.value)} // 9. Hubungkan state
+              value={email} // Hubungkan state
+              onChange={(e) => setEmail(e.target.value)} // Hubungkan state
             />
           </div>
           <div>
@@ -72,8 +95,8 @@ export default function SignInPage() {
               type="password"
               placeholder="••••••••"
               required
-              value={password} // 9. Hubungkan state
-              onChange={(e) => setPassword(e.target.value)} // 9. Hubungkan state
+              value={password} // Hubungkan state
+              onChange={(e) => setPassword(e.target.value)} // Hubungkan state
             />
           </div>
 
@@ -82,7 +105,7 @@ export default function SignInPage() {
           </Button>
         </form>
 
-        {/* 10. Tampilkan pesan error jika ada */}
+        {/* Tampilkan pesan error jika ada */}
         {message && (
           <p className="text-sm text-center mt-4 text-red-500">{message}</p>
         )}
