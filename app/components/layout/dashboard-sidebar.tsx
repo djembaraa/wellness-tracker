@@ -1,20 +1,41 @@
 // components/layout/dashboard-sidebar.tsx
-'use client'; // 1. Tambahkan ini untuk menggunakan hook
+'use client'; // Pastikan ini ada di baris pertama
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation'; // 2. Impor hook usePathname
-import { cn } from '@/lib/utils'; // 3. Impor utilitas 'cn' dari shadcn
+import { usePathname, useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 import {
   Home,
   LayoutDashboard,
   BarChart3,
   Settings,
   UserCircle,
+  LogOut,
 } from 'lucide-react';
+// 1. Impor useState DAN useEffect
+import { useState, useEffect } from 'react'; 
+import { supabase } from '@/lib/supabaseClient';
 
 export function DashboardSidebar() {
-  // 4. Dapatkan path URL saat ini
   const pathname = usePathname();
+  const router = useRouter(); 
+  const [userName, setUserName] = useState<string>('Profil');
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && user.user_metadata.full_name) {
+        setUserName(user.user_metadata.full_name);
+      }
+    };
+    fetchUserName();
+  }, []);
+
+  // 2. DEFINISIKAN handleLogout DI DALAM KOMPONEN, SEBELUM RETURN
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login'); 
+  };
 
   return (
     <aside className="hidden md:flex flex-col w-64 h-screen px-4 py-6 bg-white border-r fixed">
@@ -27,36 +48,35 @@ export function DashboardSidebar() {
 
       {/* Bagian Navigasi */}
       <nav className="flex flex-col flex-1 space-y-2">
-        
-        {/* 5. Ganti className statis dengan 'cn' yang dinamis */}
+        {/* Link Home */}
         <Link
           href="/dashboard"
           className={cn(
             "flex items-center gap-3 p-3 rounded-lg transition-all",
             pathname === "/dashboard"
-              ? "bg-primary/10 text-primary font-semibold" // Style Aktif
-              : "text-gray-600 hover:bg-gray-100" // Style Inaktif
+              ? "bg-primary/10 text-primary font-semibold"
+              : "text-gray-600 hover:bg-gray-100"
           )}
         >
           <Home className="h-5 w-5" />
           Home
         </Link>
-        
+        {/* Link Statistik */}
         <Link
           href="/dashboard/statistik"
           className={cn(
             "flex items-center gap-3 p-3 rounded-lg transition-all",
             pathname === "/dashboard/statistik"
-              ? "bg-primary/10 text-primary font-semibold" // Style Aktif
-              : "text-gray-600 hover:bg-gray-100" // Style Inaktif
+              ? "bg-primary/10 text-primary font-semibold"
+              : "text-gray-600 hover:bg-gray-100"
           )}
         >
           <BarChart3 className="h-5 w-5" />
           Statistik
         </Link>
-        
+        {/* Link Sesi */}
         <Link
-          href="/dashboard/sesi" // (Nanti kamu akan buat halaman ini)
+          href="/dashboard/sesi"
           className={cn(
             "flex items-center gap-3 p-3 rounded-lg transition-all",
             pathname === "/dashboard/sesi"
@@ -69,13 +89,14 @@ export function DashboardSidebar() {
         </Link>
       </nav>
 
-      {/* Bagian Bawah (Setting & Profile) */}
+      {/* Bagian Bawah (Setting & Profile & Logout) */}
       <div className="flex flex-col space-y-2">
+        {/* Link Pengaturan */}
         <Link
-          href="/dashboard/pengaturan" // (Nanti kamu akan buat halaman ini)
+          href="/dashboard/pengaturan"
           className={cn(
             "flex items-center gap-3 p-3 rounded-lg transition-all",
-            pathname === "/dashboard/pengaturan"
+            pathname === "/dashboard/pengaturan" 
               ? "bg-primary/10 text-primary font-semibold"
               : "text-gray-600 hover:bg-gray-100"
           )}
@@ -83,19 +104,30 @@ export function DashboardSidebar() {
           <Settings className="h-5 w-5" />
           Pengaturan
         </Link>
-        
+        {/* Link Profil */}
         <Link
-          href="/dashboard/profil" // (Nanti kamu akan buat halaman ini)
+          href="/dashboard/profil" 
           className={cn(
             "flex items-center gap-3 p-3 rounded-lg transition-all",
-            pathname === "/dashboard/profil"
+            pathname === "/dashboard/profil" 
               ? "bg-primary/10 text-primary font-semibold"
               : "text-gray-600 hover:bg-gray-100"
           )}
         >
           <UserCircle className="h-5 w-5" />
-          Armin
+          {userName} 
         </Link>
+        {/* Tombol Logout (onClick sekarang merujuk ke fungsi yang ada) */}
+        <button
+          onClick={handleLogout} 
+          className={cn(
+            "flex items-center gap-3 p-3 rounded-lg transition-all w-full text-left",
+            "text-red-500 hover:bg-red-50" 
+          )}
+        >
+          <LogOut className="h-5 w-5" />
+          Log Out
+        </button>
       </div>
     </aside>
   );
