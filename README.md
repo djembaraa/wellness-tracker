@@ -13,7 +13,7 @@ Tujuannya adalah menampilkan tampilan dashboard yang ringan, fungsional, dan sel
 
 GitHub Repository: https://github.com/djembaraa/wellness-tracker.git
 
-Link Deploy (Vercel): https://nama-proyek-kamu.vercel.app/ 
+Link Deploy (Vercel): https://wellness-tracker-weld.vercel.app/
 ---
 
 ## 🚀 Memulai (Getting Started)
